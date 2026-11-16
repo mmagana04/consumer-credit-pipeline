@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw consumer credit files landed by load/upload_to_s3.py
+    meta:
+      # dbt-duckdb reads each source straight from CSV. {name} = table name.
+      # Local default: ../data/raw   |   S3: set RAW_DATA_PATH=s3://<bucket>/raw
+      external_location: "read_csv('{{ env_var('RAW_DATA_PATH', '../data/raw') }}/{name}.csv', header = true, auto_detect = true)"
+    tables:
+      - name: borrowers
+      - name: loans
+      - name: payments

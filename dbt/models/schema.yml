@@ -1,0 +1,81 @@
+version: 2
+
+models:
+  - name: stg_borrowers
+    description: Cleaned borrower records with credit score bands.
+    columns:
+      - name: borrower_id
+        tests: [unique, not_null]
+      - name: credit_score
+        tests: [not_null]
+      - name: credit_band
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['740+ super-prime', '670-739 prime', '580-669 near-prime', '<580 subprime']
+
+  - name: stg_loans
+    description: Cleaned loan records, one per loan.
+    columns:
+      - name: loan_id
+        tests: [unique, not_null]
+      - name: borrower_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_borrowers')
+                field: borrower_id
+      - name: product_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['personal', 'auto', 'student']
+
+  - name: stg_payments
+    description: One row per scheduled monthly installment.
+    columns:
+      - name: payment_id
+        tests: [unique, not_null]
+      - name: loan_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_loans')
+                field: loan_id
+
+  - name: fct_loan_performance
+    description: One row per loan with current DPD, delinquency bucket and status.
+    columns:
+      - name: loan_id
+        tests: [unique, not_null]
+      - name: days_past_due
+        tests: [not_null]
+      - name: delinquency_bucket
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['current', '1-29 dpd', '30-59 dpd', '60-89 dpd', '90+ dpd']
+      - name: loan_status
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['open', 'paid_off', 'charged_off']
+
+  - name: mart_delinquency_rates
+    description: 30/60/90-day delinquency rates on the open book by product and credit band.
+
+  - name: mart_vintage_performance
+    description: Lifetime performance of each origination quarter.
+
+  - name: dim_borrower_risk
+    description: Borrower-level DTI, worst delinquency and rule-based risk tier.
+    columns:
+      - name: borrower_id
+        tests: [unique, not_null]
+      - name: risk_tier
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['low', 'medium', 'high']

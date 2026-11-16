@@ -1,0 +1,23 @@
+# dbt looks for profiles.yml in the directory you run it from, so this lives
+# with the project. It contains NO secrets: AWS credentials come from your
+# AWS CLI profile via the credential chain.
+consumer_credit:
+  target: local
+  outputs:
+    # reads CSVs from ../data/raw on your machine
+    local:
+      type: duckdb
+      path: credit.duckdb
+      threads: 4
+
+    # reads CSVs straight from your S3 landing zone
+    # run with:  RAW_DATA_PATH=s3://<your-bucket>/raw dbt build --target s3
+    s3:
+      type: duckdb
+      path: credit.duckdb
+      threads: 4
+      extensions: [httpfs, aws]
+      secrets:
+        - type: s3
+          provider: credential_chain
+          region: "{{ env_var('AWS_REGION', 'us-east-1') }}"

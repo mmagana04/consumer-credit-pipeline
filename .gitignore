@@ -1,0 +1,25 @@
+# secrets - never commit these
+.env
+*.pem
+.aws/
+
+# python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# data (regenerate with extract/generate_loans.py)
+data/
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+logs/
+*.duckdb
+*.duckdb.wal
+
+# editors / OS
+.vscode/settings.json
+.DS_Store

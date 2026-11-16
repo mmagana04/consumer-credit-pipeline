@@ -1,0 +1,23 @@
+name: consumer_credit
+version: "1.0.0"
+config-version: 2
+profile: consumer_credit
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+vars:
+  # "today" for delinquency math. Keep it fixed so results are reproducible.
+  as_of_date: "2026-10-31"
+
+models:
+  consumer_credit:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: view
+    marts:
+      +materialized: table
